@@ -53,7 +53,7 @@ int mkdir_p(const char* path, mode_t mode)
 int initpath(void) 
 {
   home = getenv("HOME");
-  printf("strlen-home: %ld\nmari-strlen-home: %ld", strlen(home), mari_strlen(home));
+
   if (!home) {
     fprintf(stderr, "Error: $HOME is not set\n");
     return 1;
@@ -64,8 +64,7 @@ int initpath(void)
   if(asprintf(&data_save_path, "%s/.local/share/mtuneup/music", home) == -1) goto err;
 
   mkdir_p(data_path, 0755);
-  mkdir_p(data_db_path, 0755);
-  mkdir_p(data_db_path, 0755);
+  mkdir_p(data_save_path, 0755);
 
   printf("\n [PATH]\n==> %s\n==> %s\n==> %s\n",data_path,data_db_path,data_save_path);
   return 0;
