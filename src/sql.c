@@ -35,3 +35,9 @@ int initdb()
   db_exec_safe(SQL_INIT_KEYWORDTABLE);
   return 0;
 }
+
+int closedb()
+{
+  sqlite3_close(db);
+  return 0;
+}

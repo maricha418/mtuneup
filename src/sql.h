@@ -27,4 +27,5 @@
 extern sqlite3* db;
 
 int initdb(void);
+int closedb(void);
 int db_exec_safe(const char* sql);

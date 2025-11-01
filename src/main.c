@@ -1,9 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<stdbool.h>
-
 #include<string.h>
+
 #include<unistd.h>
+#include<signal.h>
+#include<stdbool.h>
 #include<sqlite3.h>
 
 #include "sql.h"
@@ -61,6 +62,8 @@ int main(int argc, char* argv[])
 {
   int opt;
   music_info* new_music = initmusic();
+
+  signal(SIGINT, cleanall_s);
 
   while((opt = getopt(argc, argv, "hvt:a:k:c:l")) != -1)
   {

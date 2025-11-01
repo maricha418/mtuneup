@@ -3,15 +3,18 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <signal.h>
+#include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "sql.h"
 #include "utils.h"
 
-char* data_path;
-char* data_db_path;
-char* data_save_path;
+char* data_path = NULL;
+char* data_db_path = NULL;
+char* data_save_path = NULL;
 
 static char *home = NULL;
 
@@ -21,6 +24,30 @@ size_t mari_strlen(const char* str) {
   while(*p)  p++;
   return p - str;
 }
+
+
+void cleanall(void){
+  freepath();
+  closedb();
+}
+
+void cleanall_exit(int exit_code) {
+  cleanall();
+  _exit(exit_code);
+}
+
+void cleanall_s(int signal){
+  cleanall();
+  fprintf(stderr,"Program Stoped\n SIGNAL: %d\n", signal);
+}
+
+void freepath(void)
+{
+  free(data_path);
+  free(data_db_path);
+  free(data_save_path);
+}
+
 
 int mkdir_p(const char* path, mode_t mode)
 {
@@ -76,23 +103,44 @@ int initpath(void)
 
 int getvideo(const char* url, const char* title)
 {
-  const char* yt-argv[] = { "yt-dlp", "-x", "--audio-format", "mp3", "-o", };
+  char* path;
+  if(asprintf(&path, "%s/%s", data_save_path, title) == -1) {
+    perror("asprintf");
+    return -1;
+  }
+  char *const yt_argv[] = { "yt-dlp", "-x", "--audio-format", "mp3", "-o", path, (char*) url};
 
   int status;
   pid_t pid = fork();
 
-  //signal(SIGINT, SIG_DFL);
-
-  //memo: waitpid, WUNTRACED, execvp, WIFEXITED, WIFSIGNALED, WEXITSTATUS, signal(SIGINT, cleanall_s).
-}
-
-void cleanall_s(int signal){
-  //I'm sleepy.
-}
-
-void freepath()
-{
-  free(data_path);
-  free(data_db_path);
-  free(data_save_path);
+  switch (pid) {
+    case -1:
+      perror("fork");
+      free(path);
+      cleanall_exit(1);
+    case 0:
+      signal(SIGINT, SIG_DFL);
+      execvp(yt_argv[0], yt_argv);
+      perror("execvp failed");
+      _exit(1);
+    default:
+      waitpid(pid, &status, WUNTRACED);
+      if(WIFEXITED(status)){
+        int code = WEXITSTATUS(status);
+        if(code == 0) {
+          return 0;
+        } else {
+          fprintf(stderr, "yt-dlp error.....");
+          return -1;
+        }
+      }
+      else if(WIFSIGNALED(status)){
+        fprintf(stderr, "Who killed yt-dlp.\nyt-dlp killed by signal...\n");
+        free(path);
+        cleanall_exit(1);
+        return -1;
+      }
+  }
+  free(path);
+  return -1;
 }

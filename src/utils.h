@@ -6,4 +6,6 @@ extern char* data_save_path;
 
 int initpath(void);
 void freepath(void);
+void cleanall(void);
+__attribute__((noreturn)) void cleanall_exit(int exit_code);
 void cleanall_s(int signal);
