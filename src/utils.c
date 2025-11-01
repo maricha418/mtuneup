@@ -104,9 +104,9 @@ int initpath(void)
     return 1;
 }
 
-int getvideo(const char* url, const char* title)
+int getvideo(const char* url, int music_id)
 {
-  if(asprintf(&saved_path, "%s/%s", data_save_path, title) == -1) {
+  if(asprintf(&saved_path, "%s/%d", data_save_path, music_id) == -1) {
     perror("asprintf");
     return -1;
   }

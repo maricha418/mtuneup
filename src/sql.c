@@ -38,7 +38,7 @@ int initdb()
 
 int closedb()
 {
-  sqlite3_exec(db, "COMMIT;", NULL, NULL);
+  sqlite3_exec(db, "COMMIT;", NULL, NULL, NULL);
   sqlite3_close(db);
   return 0;
 }

@@ -26,7 +26,7 @@ music_info* initmusic(void)
   return m;
 }
 
-int chkmdata(music_info* minfo)
+int chkmdata(music_info* m)
 {
   //title artist check islocal
   if(m->title == NULL || m->artist == NULL) {
@@ -58,6 +58,9 @@ int main(int argc, char* argv[])
   music_info* new_music = initmusic();
 
   signal(SIGINT, cleanall_s);
+
+  mkdir_p(data_path, 0755);
+  mkdir_p(data_save_path, 0755);
 
   while((opt = getopt(argc, argv, "hvt:a:k:c:l")) != -1)
   {
@@ -109,9 +112,9 @@ int main(int argc, char* argv[])
 
   initdb();
 
-  if(getvideo(new_music -> url, newmusic -> title) == -1) {
+  if(getvideo(new_music -> url, music_id) == -1) {
     fprintf(stderr, "get video failed\n");
-    clearall_exit(1);
+    cleanall_exit(1);
   }
 
   exec_db(new_music);
