@@ -41,6 +41,7 @@ void cleanall_exit(int exit_code) {
 void cleanall_s(int signal){
   cleanall();
   fprintf(stderr,"Program Stoped\n SIGNAL: %d\n", signal);
+  exit(1);
 }
 
 void freepath(void)
@@ -61,11 +62,18 @@ int mkdir_p(const char* path, mode_t mode)
     p++;
   }
 
+  printf("\n\n[mari-mkdir -p %s]\n\n", temp);
+
   while(*p != '\0')
   {
+    printf("%c", *p);
+    fflush(stdout);
+    usleep(350000);
     if(*p == '/'){
       *p = '\0';
-
+      printf("\n/見つけたよ！(これでmkdirする): %s\n",temp);
+      fflush(stdout);
+      usleep(350000);
       if(mkdir(temp, mode) == -1 && errno != EEXIST){
         perror("mkdir");
         return -1;
@@ -76,6 +84,12 @@ int mkdir_p(const char* path, mode_t mode)
     p++;
   }
 
+//  if(mkdir(temp, mode) == -1 && errno != EEXIST){
+//    perror("mkdir");
+//    return -1;
+//  }
+
+  printf("最終: %s", temp);
   free(temp);
   return 0;
 }
@@ -89,14 +103,14 @@ int initpath(void)
     return 1;
   }
 
-  if(asprintf(&data_path, "%s/.local/share/mtuneup", home) == -1) goto err;
+  if(asprintf(&data_path, "%s/.local/share/mtuneup/", home) == -1) goto err;
   if(asprintf(&data_db_path, "%s/.local/share/mtuneup/database.db", home) == -1) goto err;
-  if(asprintf(&data_save_path, "%s/.local/share/mtuneup/music", home) == -1) goto err;
+  if(asprintf(&data_save_path, "%s/.local/share/mtuneup/music/", home) == -1) goto err;
 
   mkdir_p(data_path, 0755);
   mkdir_p(data_save_path, 0755);
 
-  printf("\n [PATH]\n==> %s\n==> %s\n==> %s\n",data_path,data_db_path,data_save_path);
+  //printf("\n [PATH]\n==> %s\n==> %s\n==> %s\n",data_path,data_db_path,data_save_path);
   return 0;
 
   err:
@@ -106,7 +120,7 @@ int initpath(void)
 
 int getvideo(const char* url, int music_id)
 {
-  if(asprintf(&saved_path, "%s/%d", data_save_path, music_id) == -1) {
+  if(asprintf(&saved_path, "%s%d.mp3", data_save_path, music_id) == -1) {
     perror("asprintf");
     return -1;
   }
